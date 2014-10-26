@@ -7,6 +7,7 @@
 //
 
 import Foundation
+
 struct Place: Printable {
     let placeURL: String
     let timeZone: String

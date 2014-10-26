@@ -7,10 +7,21 @@
 //
 
 import Foundation
-infix operator  >>> {}
 
+//------ Операторы функционального программирования ----------
+
+infix operator  >>> {associativity left precedence 150}
 func >>> <A,B> (optional : A?, f : A -> B?) -> B? {
     return flatten(optional.map(f))
+}
+
+infix operator  <^> { associativity left precedence 150 }
+func <^><A, B>(f: A -> B, a: A?) -> B? {
+    if let x = a {
+        return (f(x))
+    } else {
+        return .None
+    }
 }
 
 infix operator  <*> { associativity left precedence 150 }
@@ -22,7 +33,6 @@ func <*><A, B>(l: (A -> B)?, r: A?) -> B? {
     }
     return nil
 }
-
 //---------------------Новые операторы --------
 //  Для извлечения словаря
 
@@ -37,7 +47,7 @@ infix operator  ||> { associativity left precedence 150 }
 func ||>(input: [String:AnyObject]?, key: String) ->  [AnyObject]? {
     return input![key] >>> { $0 as? [AnyObject] }
 }
-//------------------------------
+//-------------- Функции ----------------
 
 func flatten<A>(x: A??) -> A? {
     if let y = x { return y }

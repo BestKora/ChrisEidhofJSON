@@ -2,7 +2,7 @@
 
 import Foundation
 
-//=====
+//---------------------------------------------------
 let parsedJSON : [String:AnyObject] = [
     "stat": "ok",
     "blogs": [
@@ -22,6 +22,7 @@ let parsedJSON : [String:AnyObject] = [
         ]
     ]
 ]
+//~~~~~~~~~~~~~~~~~~~ Структура Blog ~~~~~~~~~~~~~~~~~~~~~~
 
 struct Blog : Printable {
     let id: Int
@@ -34,16 +35,23 @@ struct Blog : Printable {
     static func create(id: Int)(name: String)(needsPassword: Int)(url:String) -> Blog {
         return Blog(id: id, name: name, needsPassword: Bool(needsPassword), url: toURL(url))
     }
+    
     static func parseBlog(blog: AnyObject) -> Blog? {
         return asDict(blog) >>> {
-            return (Blog.create <*> int($0,"id")
-                <*> string($0,"name")
-                <*> int($0,"needspassword")
-                <*> string($0, "url"))
+            return (Blog.create
+                           <*> int($0,"id")
+                           <*> string($0,"name")
+                           <*> int($0,"needspassword")
+                           <*> string($0, "url"))
         }
     }
-
 }
+
+func toURL(urlString: String) -> NSURL {
+    return NSURL(string: urlString)!
+}
+
+//----------------- Декодирование данных из сети ---------
 
 func decodeJSON(data: NSData) -> [String:AnyObject]? {
     var jsonErrorOptional: NSError?
@@ -55,10 +63,12 @@ func decodeJSON(data: NSData) -> [String:AnyObject]? {
     }
 }
 
-func pure<A>(value: A) -> A? {
-    return value
-}
+//--------------- Операторы ---------------
 
+infix operator  >>> {associativity left precedence 150 }
+func >>> <A,B> (optional : A?, f : A -> B?) -> B? {
+    return flatten(optional.map(f))
+}
 
 infix operator  <^> { associativity left precedence 150 }
 func <^><A, B>(f: A -> B, a: A?) -> B? {
@@ -67,13 +77,6 @@ func <^><A, B>(f: A -> B, a: A?) -> B? {
     } else {
         return .None
     }
-}
-
-
-infix operator  >>> {}
-
-func >>> <A,B> (optional : A?, f : A -> B?) -> B? {
-    return flatten(optional.map(f))
 }
 
 infix operator  <*> { associativity left precedence 150 }
@@ -85,12 +88,12 @@ func <*><A, B>(l: (A -> B)?, r: A?) -> B? {
     }
     return nil
 }
+//--------------- Функции --------------
 
 func flatten<A>(x: A??) -> A? {
     if let y = x { return y }
     return nil
 }
-
 
 func asDict(x: AnyObject) -> [String:AnyObject]? {
     return x as? [String:AnyObject]
@@ -108,7 +111,6 @@ func join<A>(elements: [A?]) -> [A]? {
     }
     return result
 }
-
 
 func array(input: [String:AnyObject], key: String) ->  [AnyObject]? {
     return input[key] >>> { $0 as? [AnyObject] }
@@ -133,11 +135,11 @@ func int(input: [NSObject:AnyObject], key: String) -> Int? {
 func bool(input: [NSObject:AnyObject], key: String) -> Bool? {
     return number(input,key).map { $0.boolValue }
 }
+//---------------- Парсинг Blog -----------------------------
 
 func parseJSON() {
     let blogs:[Blog]? = dictionary(parsedJSON, "blogs") >>> {
-        array($0, "blog") >>> {
-            join($0.map(Blog.parseBlog))
+                                      array($0, "blog") >>> {join($0.map(Blog.parseBlog))
         }
     }
     for blg in blogs! {
@@ -145,34 +147,26 @@ func parseJSON() {
     }
 }
 
-
-func toURL(urlString: String) -> NSURL {
-    return NSURL(string: urlString)!
-}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~ Test 1 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 parseJSON()
 
-//======
+//~~~~~~~~~~~~~ Test 2 с декодированием данных из сети ~~~~~~~~~~~~~~~~~~~~~~~~~
+
 var jsonString = "{ \"stat\": \"ok\", \"blogs\": { \"blog\": [ { \"id\" : 73, \"name\" : \"Bloxus test\", \"needspassword\" : true, \"url\" : \"http://remote.bloxus.com/\" }, { \"id\" : 74, \"name\" : \"Manila Test\", \"needspassword\" : false, \"url\" : \"http://flickrtest1.userland.com/\" } ] } }"
+
 let jsonData = jsonString.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: true)
 
-var blogs2:[Blog]? = jsonData >>> {decodeJSON ($0)
+var blogs1:[Blog]? = jsonData >>> decodeJSON
                               >>> {dictionary($0,"blogs")
-                              >>> { array($0, "blog") >>> {
-                             join($0.map(Blog.parseBlog))
+                              >>> { array($0, "blog") >>> {join($0.map(Blog.parseBlog))
             }
         }
     }
-}
-var parsedJSON1 =  jsonData >>> decodeJSON
-let blogs1:[Blog]? = dictionary(parsedJSON1!,"blogs") >>> {
-                                    array($0, "blog") >>> {
-                                   join($0.map(Blog.parseBlog))
-    }
-}
-for blg in blogs2! {
+
+for blg in blogs1! {
     println("\(blg.description)")
 }
 
-//=====
+//---------------------------------------------------------------------------
 
