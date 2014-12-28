@@ -40,9 +40,13 @@ class ViewController: UITableViewController {
 */
             dispatch_async(dispatch_get_main_queue()) {
                 self.tableView.reloadData()
-                for place in self.places! {
-                    println("\(place.content) photos \(place.photoCount)")
+                
+                switch self.places {
+                case .Some (let a):
+                    println(a.reduce("", {$0 + $1.content + " " + $1.photoCount + "\n"} ))
+                default: return ()
                 }
+
             }
         }
         
@@ -57,8 +61,10 @@ class ViewController: UITableViewController {
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         var cellIdentifier = "PlaceCell"
         var cell:UITableViewCell = tableView.dequeueReusableCellWithIdentifier(cellIdentifier, forIndexPath: indexPath) as UITableViewCell
-        cell.textLabel.text = self.places![indexPath.row].content
-        cell.detailTextLabel!.text = "\(self.places![indexPath.row].photoCount)"
+        cell.textLabel?.text = self.places.map{$0[indexPath.row]}?.content
+        cell.detailTextLabel?.text = self.places.map{$0[indexPath.row]}?.photoCount
+
+
         return cell
     }
     

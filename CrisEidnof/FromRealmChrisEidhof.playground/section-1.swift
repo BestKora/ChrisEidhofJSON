@@ -1,4 +1,4 @@
-// This code accompanies a blog post: http://chris.eidhof.nl/posts/json-parsing-in-swift.html
+// This code accompanies a Swift meetup video on Realm: http://realm.io/news/functional-programming-swift-chris-eidhof/
 //
 // As the >>= operator is already defined, so I changed it to >>>=
 
@@ -32,33 +32,40 @@ struct Blog {
     let url: NSURL
 }
 
-func parseBlog(blog: AnyObject) -> Blog? {
-    let mkBlog = curry {id, name, needsPassword, url in Blog(id: id, name: name, needsPassword: needsPassword, url: url) }
+
+func parseBlog(blogData: [String:AnyObject]) -> Blog? {
+    let makeBlog = curry { Blog(id: $0, name: $1, needsPassword: $2, url: $3) }
     
-    return asDict(blog) >>>= {
-        mkBlog <*> int($0,"id")
-            <*> string($0,"name")
-            <*> bool($0,"needspassword")
-            <*> (string($0, "url") >>>= toURL)
-    }
+    return
+        makeBlog <*> int(blogData,"id")
+            <*> string(blogData,"name")
+            <*> bool(blogData,"needspassword")
+            <*> (string(blogData, "url") >>>= toURL)
 }
+
 
 
 func parseJSON() {
     let blogs = dictionary(parsedJSON, "blogs") >>>= {
-                              array($0, "blog") >>>= {
-                                    join($0.map(parseBlog))
+        array($0, "blog") >>>= {
+            join($0.map({asDict($0) >>>= parseBlog}))
         }
     }
-    printBlogs(blogs)
+    
+    switch blogs {
+    case .Some (let a):
+        println(a.reduce("", {$0 + $1.description + "\n"} ))
+    default: return ()
+    }
+    
 }
+
 
 extension Blog : Printable {
     var description : String {
         return "Blog { id = \(id), name = \(name), needsPassword = \(needsPassword), url = \(url)"
     }
 }
-
 
 func toURL(urlString: String) -> NSURL {
     return NSURL(string: urlString)!
@@ -142,8 +149,8 @@ infix operator  >>>= {}
 func >>>= <A,B> (optional : A?, f : A -> B?) -> B? {
     return flatten(optional.map(f))
 }
-
-//---------------------Новые операторы --------
+//------------------ Дополнительный код ----------
+//---------------------Новые pipe операторы --------
 //  Для извлечения словаря
 
 infix operator  |> { associativity left precedence 150 }
@@ -157,7 +164,7 @@ infix operator  ||> { associativity left precedence 150 }
 func ||>(input: [String:AnyObject]?, key: String) ->  [AnyObject]? {
     return input![key] >>>= { $0 as? [AnyObject] }
 }
-//-------------------------------------------------
+// -------------------Печать [Blog]? on Playground  ----------
 func printBlogs(blogs:[Blog]?){
     switch blogs {
     case .Some (let a):
@@ -166,10 +173,14 @@ func printBlogs(blogs:[Blog]?){
     }
 }
 
+//-------------- parse with pipe operators -------
 func parseJSON1() {
-    let blogs = parsedJSON |> "blogs" ||> "blog" >>>= {join($0.map(parseBlog))}
+    let blogs = parsedJSON |> "blogs" ||> "blog" >>>= {join($0.map({asDict($0) >>>= parseBlog}))}
     printBlogs(blogs)
 }
 
+
 parseJSON()
 parseJSON1()
+
+
