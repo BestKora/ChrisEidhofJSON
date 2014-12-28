@@ -170,3 +170,36 @@ for blg in blogs1! {
 
 //---------------------------------------------------------------------------
 
+func add (i:Int, j:Int, k:Int, l:Int) -> Int {return(i + j + k + l)}
+
+// 1-  ый метод каррирования функций
+
+func curry<A,B,C,D,R>(f: (A,B,C,D) -> R) -> A -> B -> C -> D -> R {
+    return { a in { b in { c in { d in f(a,b,c,d) } } } }
+}
+
+let sum4 = curry (add )
+
+// 2-  ый метод (curried function in Swift)
+
+func sum4Swift(i: Int)(j:Int)(k: Int)(l:Int) -> Int {
+    return add(i, j, k, l)
+}
+
+
+sum4 (1)(2)(3)(5)
+sum4Swift (1)(j: 2)(k: 3)(l: 5)
+
+func chained (i:Int) -> Int-> Int -> Int {
+    return { j in
+        return { k in
+            return i + j + k;
+        }
+    }
+}
+
+chained(5)(6)(7)
+
+
+
+

@@ -36,6 +36,7 @@
 		E47D2A8D19E468C000355434 /* Get.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Get.swift; sourceTree = "<group>"; };
 		E47D2A8F19E5856400355434 /* JSON.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSON.swift; sourceTree = "<group>"; };
 		E47D2A9119E585B300355434 /* Place.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Place.swift; sourceTree = "<group>"; };
+		E49BAC491A5042F600EDA5C7 /* From ChrisEidhof.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = "From ChrisEidhof.playground"; sourceTree = "<group>"; };
 		E4BEF52519A0E69B0062F17E /* CrisEidnof.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CrisEidnof.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E4BEF52919A0E69B0062F17E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E4BEF52A19A0E69B0062F17E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -98,6 +99,7 @@
 			isa = PBXGroup;
 			children = (
 				E4BEF54719A0E70F0062F17E /* FunctionalJSON.playground */,
+				E49BAC491A5042F600EDA5C7 /* From ChrisEidhof.playground */,
 				E47D2A8719E2C38000355434 /* Flickr */,
 				E47D2A8819E2C49800355434 /* CrisEidnof-Bridging-Header.h */,
 				E4BEF52E19A0E69B0062F17E /* Main.storyboard */,
